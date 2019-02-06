@@ -1,6 +1,6 @@
 {
     "name": "carlosocarvalho/elasticsearch",
-    "description": "Laravel, Lumen and Native php elasticseach query builder to build complex queries using an elegant syntax. This is fork from basemkhirat",
+    "description": "Laravel, Lumen and Native php elasticseach query builder to build complex queries using an elegant syntax. This is fork from carlosocarvalho",
     "keywords": [
         "elasticsearch",
         "php",
@@ -15,8 +15,8 @@
     "type": "package",
     "authors": [
         {
-            "name": "basemkhirat",
-            "email": "basemkhirat@gmail.com"
+            "name": "carlosocarvalho",
+            "email": "carlosocarvalho@gmail.com"
         },
         {
             "name": "carlosocarvalho",
