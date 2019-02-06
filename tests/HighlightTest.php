@@ -6,10 +6,10 @@
  * Time: 17:08
  */
 
-namespace Basemkhirat\Elasticsearch\Tests;
+namespace CarlosOCarvalho\Elasticsearch\Tests;
 
 
-use Basemkhirat\Elasticsearch\Tests\Traits\ESQueryTrait;
+use CarlosOCarvalho\Elasticsearch\Tests\Traits\ESQueryTrait;
 
 class HighlightTest  extends \PHPUnit_Framework_TestCase
 {
