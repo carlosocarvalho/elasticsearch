@@ -78,6 +78,15 @@ class Query
     protected $filter = [];
 
     /**
+     * @var array
+     */
+    protected $aggregations = [];
+
+    /**
+     * @var collection
+     */
+    protected $aggregationResult;
+    /**
      * Query bool must
      * @var array
      */
@@ -655,6 +664,13 @@ class Query
         return $this;
     }
 
+
+    public function aggregation($name, $options = [])
+    {
+        $this->aggregations = array_merge([$name => $options], $this->aggregations);
+        return $this;
+    }
+
     /**
      * Search the entire document fields
      * @param null $q
@@ -713,9 +729,13 @@ class Query
             $body["sort"] = array_unique(array_merge($sortFields, $this->sort), SORT_REGULAR);
 
         }
-        if( count($this->highlight)) {
+        if (count($this->highlight)) {
 
             $body['highlight'] = ['fields' => $this->highlight];
+        }
+
+        if (count($this->aggregations)) {
+            $body['aggs'] = $this->aggregations;
         }
 
         $this->body = $body;
@@ -911,14 +931,26 @@ class Query
      * @param $row
      * @return mixed
      */
-    protected function makeHasHighlight(array $row){
+    protected function makeHasHighlight(array $row)
+    {
 
-        if( isset($row['highlight'])) {
-            foreach ($row['highlight'] as $k => $v){
+        if (isset($row['highlight'])) {
+            foreach ($row['highlight'] as $k => $v) {
                 $row['_source'][$k] = implode($v);
             }
         }
         return $row;
+    }
+
+    public function getAggregations()
+    {
+        if ($this->isAggregation()) return $this->aggregationResult;
+    }
+
+
+    protected function isAggregation()
+    {
+        return count($this->aggregations) >= 1;
     }
 
 
@@ -931,6 +963,7 @@ class Query
     {
 
         $new = [];
+
 
         foreach ($result["hits"]["hits"] as $row) {
             $row = $this->makeHasHighlight($row);
@@ -958,6 +991,10 @@ class Query
         $new->timed_out = $result["timed_out"];
         $new->scroll_id = isset($result["_scroll_id"]) ? $result["_scroll_id"] : NULL;
         $new->shards = (object)$result["_shards"];
+
+        if ($this->isAggregation()) {
+            $new->aggregations = new Collection($result['aggregations']);
+        }
 
         return $new;
     }
@@ -1016,8 +1053,12 @@ class Query
         $this->skip(($page * $per_page) - $per_page);
 
         $objects = $this->get();
+        $options = ['path' => Request::url(), 'query' => Request::query()];
 
-        return new Pagination($objects, $objects->total, $per_page, $page, ['path' => Request::url(), 'query' => Request::query()]);
+        if ($this->isAggregation()) {
+            $options['aggregations'] = $objects->aggregations;
+        }
+        return new Pagination($objects, $objects->total, $per_page, $page, $options);
     }
 
     /**
@@ -1028,13 +1069,14 @@ class Query
      * @param array $post_tag
      * @return $this
      */
-    public function highlight($field, $pre_tag = ['<span class="highlight-elastic">'], $post_tag = ['</span>']){
+    public function highlight($field, $pre_tag = ['<span class="highlight-elastic">'], $post_tag = ['</span>'])
+    {
 
-        if( is_array($field)){
-            $this->highlight = array_unique(array_merge($this->highlight, $field), SORT_REGULAR); ;
+        if (is_array($field)) {
+            $this->highlight = array_unique(array_merge($this->highlight, $field), SORT_REGULAR);;
         }
-        if( is_string($field) ){
-            $this->highlight[$field] = [ "number_of_fragments" => 0 ,'pre_tags' => $pre_tag, 'post_tags'=> $post_tag];
+        if (is_string($field)) {
+            $this->highlight[$field] = ["number_of_fragments" => 0, 'pre_tags' => $pre_tag, 'post_tags' => $post_tag];
         }
         return $this;
     }
