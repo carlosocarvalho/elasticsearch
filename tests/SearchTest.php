@@ -38,7 +38,11 @@ class SearchTest extends \PHPUnit_Framework_TestCase
         }
 
         $query["body"]["query"]["bool"]["must"][] = [
-            "query_string" => $search_params
+            "multi_match" =>  [
+                'query' => $q,
+                'type'  => 'best_fields',
+                'fields' => []
+            ]
         ];
 
         return $query;

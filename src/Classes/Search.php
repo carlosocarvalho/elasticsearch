@@ -35,11 +35,12 @@ class Search
      */
     public $fields = [];
 
+    public $queryType; // best_fields | most_fields | cross_fields | phrase
     /**
      * Search constructor.
      * @param Query $query
      */
-    public function __construct(Query $query, $q, $settings = NULL)
+    public function __construct(Query $query, $q, $settings = NULL, $queryType = null)
     {
         $this->query = $query;
         $this->q = $q;
@@ -47,7 +48,7 @@ class Search
         if(is_callback_function($settings)){
             $settings($this);
         }
-
+        $this->queryType = $queryType ? $queryType : 'best_fields';
         $this->settings = $settings;
     }
 
@@ -101,8 +102,18 @@ class Search
             $query_params["fields"] = $this->fields;
         }
 
+
         $this->query->must[] = [
-            "query_string" => $query_params
+            "multi_match" => [
+
+                'type' => $this->queryType,
+                'fields' => count($this->fields) ? $this->fields : [],
+                'query'  => $this->q
+
+            ]
         ];
     }
+
+
+
 }
