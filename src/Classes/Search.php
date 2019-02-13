@@ -35,20 +35,20 @@ class Search
      */
     public $fields = [];
 
-    public $queryType; // best_fields | most_fields | cross_fields | phrase
+    public $queryType; // best_fields | most_fields | cross_fields | phrase | simple_query
     /**
      * Search constructor.
      * @param Query $query
      */
-    public function __construct(Query $query, $q, $settings = NULL, $queryType = null)
+    public function __construct(Query $query, $q, $settings = null, $queryType = null)
     {
         $this->query = $query;
         $this->q = $q;
 
-        if(is_callback_function($settings)){
+        if (is_callback_function($settings)) {
             $settings($this);
         }
-        $this->queryType = $queryType ? $queryType : 'best_fields';
+        $this->queryType = $queryType ? $queryType : 'simple_query_string';
         $this->settings = $settings;
     }
 
@@ -94,26 +94,29 @@ class Search
 
         $query_params["query"] = $this->q;
 
-        if($this->boost > 1) {
+        if ($this->boost > 1) {
             $query_params["boost"] = $this->boost;
         }
 
-        if(count($this->fields)){
+        if (count($this->fields)) {
             $query_params["fields"] = $this->fields;
         }
 
-
-        $this->query->must[] = [
-            "multi_match" => [
-
-                'type' => $this->queryType,
-                'fields' => count($this->fields) ? $this->fields : [],
-                'query'  => $this->q
-
-            ]
-        ];
+        if ($this->queryType == 'simple_query_string') {
+            $this->query->must[] = [
+                "simple_query_string" => [
+                    'fields' => count($this->fields) ? $this->fields : [],
+                    'query'  => $this->q
+                ]
+            ];
+        } else {
+            $this->query->must[] = [
+                "multi_match" => [
+                    'type' => $this->queryType,
+                    'fields' => count($this->fields) ? $this->fields : [],
+                    'query'  => $this->q
+                ]
+            ];
+        }
     }
-
-
-
 }
