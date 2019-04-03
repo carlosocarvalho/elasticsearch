@@ -38,6 +38,8 @@ class Search
     public $queryType; // best_fields | most_fields | cross_fields | phrase | simple_query
 
     public $default_operator = 'OR';
+
+    public $analyzer = null;
     /**
      * Search constructor.
      * @param Query $query
@@ -105,21 +107,31 @@ class Search
         }
 
         if ($this->queryType == 'simple_query_string') {
-            $this->query->must[] = [
-                "simple_query_string" => [
+            $query = [
                     'fields' => count($this->fields) ? $this->fields : [],
                     'query'  => $this->q,
                     'default_operator' => $this->default_operator
-                ]
+            ];
+
+            if ($this->analyzer) {
+                $query['analyzer']  =  $this->analyzer;
+            }
+            $this->query->must[] = [
+                "simple_query_string" =>  $query
             ];
         } else {
-            $this->query->must[] = [
-                "multi_match" => [
+            $query = [
                     'type' => $this->queryType,
                     'fields' => count($this->fields) ? $this->fields : [],
                     'query'  => $this->q,
                     'default_operator' => $this->default_operator
-                ]
+            ];
+
+            if ($this->analyzer) {
+                $query['analyzer']  =  $this->analyzer;
+            }
+            $this->query->must[] = [
+                "multi_match" => $query
             ];
         }
     }
