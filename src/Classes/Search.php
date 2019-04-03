@@ -36,6 +36,8 @@ class Search
     public $fields = [];
 
     public $queryType; // best_fields | most_fields | cross_fields | phrase | simple_query
+
+    public $default_operator = 'OR';
     /**
      * Search constructor.
      * @param Query $query
@@ -106,7 +108,8 @@ class Search
             $this->query->must[] = [
                 "simple_query_string" => [
                     'fields' => count($this->fields) ? $this->fields : [],
-                    'query'  => $this->q
+                    'query'  => $this->q,
+                    'default_operator' => $this->default_operator
                 ]
             ];
         } else {
@@ -114,7 +117,8 @@ class Search
                 "multi_match" => [
                     'type' => $this->queryType,
                     'fields' => count($this->fields) ? $this->fields : [],
-                    'query'  => $this->q
+                    'query'  => $this->q,
+                    'default_operator' => $this->default_operator
                 ]
             ];
         }
