@@ -5,8 +5,6 @@
 <a href="https://packagist.org/packages/carlosocarvalho/elasticsearch"><img src="https://poser.pugx.org/carlosocarvalho/elasticsearch/license.svg" alt="License"></a>
 </p>
 
-<p align="center"><img src="http://carlosocarvalho.com/images/carlosocarvalho-elasticsearch.png?123"></p>
-
 
 ## Laravel, Lumen and Native php elasticseach query builder to build complex queries using an elegant syntax
 
